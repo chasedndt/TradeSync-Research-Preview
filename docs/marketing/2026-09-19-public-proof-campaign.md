@@ -1,6 +1,6 @@
 # TradeSync public-proof campaign draft
 
-Status: GitHub preview and ChaseInTech case study published; social copy prepared, not published  
+Status: GitHub preview and ChaseInTech case study published; social copy prepared, not published
 Evidence date: 2026-09-19  
 Social publication gate: operator review and explicit approval
 
