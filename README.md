@@ -6,6 +6,11 @@
 
 TradeSync is a standalone-first Hyperliquid market intelligence, paper-trading, alerting, evidence, and future governed-execution workstation.
 
+Published by **ChaseInTech** as part of the ChaseInTech personal AI and
+software-engineering brand. ChaseInTech is the legal licensor named in this
+release's FSL-1.1-MIT notice; the canonical project case study is available at
+[chaseintech.com/projects/tradesync](https://chaseintech.com/projects/tradesync/).
+
 > **Public research-preview status:** first-party TradeSync software is available under the [FSL-1.1-MIT](LICENSE.md). This is a Fair Source, source-available licence—not an OSI-approved open-source licence—and each release converts to MIT after two years. Provider data, private ChaseOS/Hermes artifacts and credentials are excluded. Read the [public-source notice](PUBLIC_SOURCE_NOTICE.md), [third-party notices](THIRD_PARTY_NOTICES.md), [bring-your-own-credentials guide](docs/providers/BRING_YOUR_OWN_CREDENTIALS.md), and [security policy](SECURITY.md) before running or redistributing anything.
 
 Latest evidence integration: [StrikeZone browser-research receipts in Integration Pipeline](docs/changes/2026-09-19_strikezone-research-evidence-pipeline.md). The dashboard now shows the newest ChaseOS research run, its freshness, source coverage and blockers without copying private artifacts or granting execution authority.
