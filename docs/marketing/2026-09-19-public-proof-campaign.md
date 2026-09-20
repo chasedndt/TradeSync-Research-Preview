@@ -1,8 +1,8 @@
 # TradeSync public-proof campaign draft
 
-Status: prepared, not published  
+Status: GitHub preview and ChaseInTech case study published; social copy prepared, not published  
 Evidence date: 2026-09-19  
-Publication gate: operator review and explicit approval
+Social publication gate: operator review and explicit approval
 
 ## Claim boundary
 
@@ -142,7 +142,7 @@ Audio/edit direction:
 - [x] GitHub README: public-source and redistribution boundary prepared locally.
 - [x] ChaseInTech project page: new evidence-led case study prepared locally.
 - [x] LinkedIn: post and video copy drafted here.
-- [ ] GitHub changes pushed after operator approval.
-- [ ] ChaseInTech deployed and read back from its canonical public URL.
+- [x] GitHub research preview published at <https://github.com/chasedndt/TradeSync-Research-Preview>.
+- [x] ChaseInTech case study deployed and read back at <https://chaseintech.com/projects/tradesync/>.
 - [ ] LinkedIn posted and permalink recorded.
 - [ ] Other profiles updated only after an inventory confirms the account, current copy and edit authority.
