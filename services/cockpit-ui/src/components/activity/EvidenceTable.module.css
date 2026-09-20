@@ -1,0 +1,39 @@
+.scroll {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.table th {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font: 600 10px/1 var(--font-mono);
+  letter-spacing: 0.07em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-soft);
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.table tbody tr:hover td {
+  background: rgba(91, 169, 255, 0.05);
+}
+
+.table td.wrap {
+  min-width: 220px;
+  max-width: 420px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

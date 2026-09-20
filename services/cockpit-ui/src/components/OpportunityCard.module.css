@@ -1,0 +1,28 @@
+.card {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 13px 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.12s ease;
+}
+.card:hover { border-color: #3a4d66; }
+.card:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.expired { opacity: 0.65; }
+
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 9px; }
+.symbol { font-size: 14px; font-weight: 700; }
+.timeframe { padding: 1px 6px; border-radius: 3px; background: var(--panel-muted); color: var(--muted); font: 11px var(--font-mono); }
+.side { font: 600 12px var(--font-mono); }
+.status { margin-left: auto; color: var(--muted); font: 11px var(--font-mono); }
+
+.facts { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; }
+.facts div { min-width: 0; }
+.facts dt { margin-bottom: 2px; color: var(--muted); font-size: 10.5px; }
+.facts dd { margin: 0; font: 12px var(--font-mono); overflow-wrap: anywhere; }
+
+.meta { margin: 0; color: var(--muted); font: 11px var(--font-mono); overflow-wrap: anywhere; }

@@ -1,0 +1,309 @@
+name: tradesync-full
+
+# The one symbol list for the whole stack. market-data polls these, core-scorer
+# scores them, the Cockpit reads whatever market-data reports. Change it here
+# only.
+#
+# Selection rule (reviewed 2026-09-12 against Hyperliquid metaAndAssetCtxs):
+# 24h notional volume >= $30M AND max leverage >= 10x. That gave, in volume
+# order: BTC 3.6B, ETH 2.6B, HYPE 596M, ZEC 519M, SOL 311M, XRP 103M, NEAR 77M,
+# PUMP 76M, LINK 33M, UNI 31M. Review monthly; the rule is the authority, not
+# the list. Spot-premium context will be unavailable for coins Coinbase does not
+# list, and that shows as lower coverage rather than as a substitute value.
+x-market-symbols: &market_symbols "BTC-PERP,ETH-PERP,HYPE-PERP,ZEC-PERP,SOL-PERP,XRP-PERP,NEAR-PERP,PUMP-PERP,LINK-PERP,UNI-PERP"
+
+services:
+  # Every published port is bound to 127.0.0.1, so the stack answers this
+  # machine only. Do not widen a binding to reach it remotely; see
+  # docs/security/2026-09-15_local-access-review.md.
+  # --- Infra (same as compose.infra.yml) ---
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    command: [ "redis-server", "--appendonly", "yes" ]
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${QDRANT_PORT:-6333}:6333"
+    volumes:
+      - qdrantdata:/qdrant/storage
+    healthcheck:
+      # qdrant/qdrant:1.19 does not ship curl. Use Bash's TCP socket support
+      # for container liveness; operator/API acceptance still probes /healthz.
+      test: [ "CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/6333" ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  schema-init:
+    image: python:3.11-slim
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      DB_HOST: postgres
+      DB_PORT: 5432
+    volumes:
+      - ./:/app/ops:ro
+    working_dir: /app
+    command: >
+      sh -c "pip install --no-cache-dir asyncpg && python ops/apply_schema.py"
+    restart: "no"
+
+  # --- Services ---
+  state-api:
+    build:
+      context: ..
+      dockerfile: services/state-api/Dockerfile
+    image: tradesync/state-api:dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      schema-init:
+        condition: service_completed_successfully
+    environment:
+      # In-container DSN: talk to "postgres" at 5432
+      PG_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379
+      MARKET_DATA_URL: http://market-data:8005
+      EXECUTION_ENABLED: "false"
+      MAX_SIGNAL_AGE_SECONDS: "3600"
+      MAX_EVENT_AGE_SECONDS: "3600"
+      MIN_QUALITY: "1.0"
+    ports:
+      - "127.0.0.1:8000:8000"
+    # pine-ingress is the network the tunnel connector joins (M3); signer is
+    # the only one signer-svc joins, for its status (M4). Declared here, not
+    # in the optional files, so recreating state-api keeps both routes.
+    networks:
+      default:
+      pine-ingress:
+      signer:
+
+  alert-router-rs:
+    profiles: ["notifications"]
+    build:
+      context: ..
+      dockerfile: services/alert-router-rs/Dockerfile
+    image: tradesync/alert-router-rs:dev
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      schema-init:
+        condition: service_completed_successfully
+    environment:
+      PG_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379
+      ALERT_ROUTER_PRODUCER_TOKEN: ${ALERT_ROUTER_PRODUCER_TOKEN:-}
+    ports:
+      - "127.0.0.1:8010:8010"
+
+  core-scorer:
+    build:
+      context: ..
+      dockerfile: services/core-scorer/Dockerfile
+    image: tradesync/core-scorer:dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      MARKET_SYMBOLS: *market_symbols
+      PG_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      SCORING_INTERVAL: 10
+      REDIS_URL: redis://redis:6379
+      # Sent with each harness ask when state-api requires an operator token.
+      STATE_API_OPERATOR_TOKEN: ${STATE_API_OPERATOR_TOKEN:-}
+    ports:
+      - "127.0.0.1:8001:8000"
+
+
+  exec-hl-svc:
+    build:
+      context: ..
+      dockerfile: services/exec-hl-svc/Dockerfile
+    image: tradesync/exec-hl-svc:dev
+    ports:
+      - "127.0.0.1:8004:8004"
+    environment:
+      DRY_RUN: "true"
+      EXECUTION_ENABLED: "false" # Fail closed; activation requires a separate approved change
+      # HYPERLIQUID_API_URL: ${HYPERLIQUID_API_URL}
+      # HYPERLIQUID_WALLET_PK: ${HYPERLIQUID_WALLET_PK}
+    # signer: the internal network signer-svc joins, so this service, the one
+    # caller that may ask for signatures, can reach it (M4).
+    networks:
+      default:
+      signer:
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    healthcheck:
+      test: [ "CMD", "curl", "-sf", "http://localhost:8004/healthz" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  ingest-gateway:
+    build:
+      context: ..
+      dockerfile: services/ingest-gateway/Dockerfile
+    image: tradesync/ingest-gateway:dev
+    depends_on:
+      - redis
+    environment:
+      PYTHONPATH: /app
+      PG_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    ports:
+      - "127.0.0.1:8080:8080"
+
+  fusion-engine:
+    build:
+      context: ..
+      dockerfile: services/fusion-engine/Dockerfile
+    image: tradesync/fusion-engine:dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      default:
+        aliases:
+          - opportunity-builder
+    environment:
+      PG_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379
+      STATE_API_URL: http://state-api:8000
+      MARKET_DATA_URL: http://market-data:8005
+      PYTHONUNBUFFERED: 1
+      OPPORTUNITY_THRESHOLD: 2.0
+      OPPORTUNITY_TTL_SECONDS: 900
+      CLAIM_IDLE_MS: 60000
+      CLAIM_BATCH: 50
+      STREAM_READ_COUNT: 50
+      STREAM_BLOCK_MS: 5000
+    ports:
+      - "127.0.0.1:8002:8002"
+    healthcheck:
+      test: [ "CMD", "curl", "-sf", "http://localhost:8002/healthz" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  cockpit-ui:
+    build:
+      context: ../services/cockpit-ui
+    image: tradesync/cockpit-ui:dev
+    depends_on:
+      - state-api
+    ports:
+      - "127.0.0.1:3000:80"
+    healthcheck:
+      test: [ "CMD", "curl", "-sf", "http://localhost:80" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  market-data:
+    build:
+      context: ..
+      dockerfile: services/market-data/Dockerfile
+    image: tradesync/market-data:dev
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      REDIS_URL: redis://redis:6379
+      MARKET_SYMBOLS: *market_symbols
+      ENABLE_HYPERLIQUID: "true"
+      POLL_INTERVAL_CONTEXT: "5000"
+      # One request per symbol per cycle, all symbols concurrently, against a
+      # 120/min venue limiter shared with funding history and candle fetches.
+      # Ten symbols at 8s is 75/min; the snapshot timestamp is refreshed by
+      # this loop, so this interval bounds how old Mission Control sees a
+      # symbol. Raise it if the list grows past about fifteen.
+      POLL_INTERVAL_ORDERBOOK: "8000"
+      PYTHONUNBUFFERED: 1
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    ports:
+      - "127.0.0.1:8005:8005"
+    healthcheck:
+      # /readyz, not /healthz: the container must report unhealthy when the
+      # pollers stop, not merely when the process dies. On 2026-09-07 a
+      # port-only check reported healthy for an hour while no data flowed.
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/readyz', timeout=3)" ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+
+  backtest-runner:
+    profiles: [analytics]
+    build:
+      context: ..
+      dockerfile: services/backtest-runner/Dockerfile
+    image: tradesync/backtest-runner:dev
+    volumes:
+      - ../data:/app/data
+
+networks:
+  # Shared by state-api and cloudflared only, and internal: nothing routes out
+  # through it. See docs/security/2026-09-15_local-access-review.md (M3).
+  pine-ingress:
+    internal: true
+    # A fixed range, so cloudflared holds a fixed address outside the range
+    # Docker assigns from: the one peer whose CF-Connecting-IP state-api
+    # believes (TRADINGVIEW_INGRESS_PEERS, finding L2).
+    ipam:
+      config:
+        - subnet: 172.29.53.0/28
+          ip_range: 172.29.53.0/29
+  # The only network signer-svc joins (ops/compose.signer.yml), with exec-hl-svc
+  # and state-api. Internal: the signer needs no route anywhere (M4).
+  signer:
+    internal: true
+
+volumes:
+  pgdata:
+  qdrantdata:

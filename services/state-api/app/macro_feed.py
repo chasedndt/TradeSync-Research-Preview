@@ -1,0 +1,258 @@
+"""
+Phase 3C: Macro Feed MVP
+
+Simple RSS-based macro headline aggregator for trading context.
+Fetches headlines from configurable financial news sources.
+"""
+
+import os
+import asyncio
+import logging
+import time
+import xml.etree.ElementTree as ET
+from typing import List, Optional, Dict, Any
+from datetime import datetime, timezone
+import httpx
+
+# Relative, not ``app.``: the root test suite loads state-api modules under a
+# private package alias, where an absolute import could reach another service.
+from .macro_feed_parsing import MacroHeadline, detect_sentiment, parse_item
+
+logger = logging.getLogger(__name__)
+
+# Default RSS sources (can be overridden via env)
+DEFAULT_RSS_SOURCES = [
+    # These are placeholder URLs - replace with actual RSS feeds
+    {"name": "Cointelegraph", "url": "https://cointelegraph.com/rss", "category": "crypto"},
+    {"name": "CoinDesk", "url": "https://www.coindesk.com/arc/outboundfeeds/rss/", "category": "crypto"},
+    {"name": "Bloomberg Crypto", "url": "https://feeds.bloomberg.com/crypto/news.rss", "category": "macro"},
+]
+
+# Cache settings
+CACHE_TTL_SECONDS = int(os.getenv("MACRO_FEED_CACHE_TTL", "300"))  # 5 minutes
+MAX_HEADLINES_PER_SOURCE = int(os.getenv("MACRO_FEED_MAX_PER_SOURCE", "10"))
+MAX_TOTAL_HEADLINES = int(os.getenv("MACRO_FEED_MAX_TOTAL", "30"))
+
+
+class MacroFeedService:
+    """
+    Simple RSS-based macro headline aggregator.
+
+    Features:
+    - Configurable RSS sources
+    - In-memory caching with TTL
+    - Async fetching
+    - Basic parsing of RSS/Atom feeds
+    """
+
+    def __init__(self, sources: Optional[List[Dict[str, str]]] = None):
+        self.sources = sources or self._load_sources_from_env()
+        self.cache: List[MacroHeadline] = []
+        self.cache_updated_at: float = 0
+        self.fetch_lock = asyncio.Lock()
+        # Handle for the background refresh, so only one runs at a time.
+        self._refresh_task: Optional[asyncio.Task] = None
+        self._client: Optional[httpx.AsyncClient] = None
+
+    def _load_sources_from_env(self) -> List[Dict[str, str]]:
+        """Load RSS sources from environment or use defaults."""
+        sources_json = os.getenv("MACRO_RSS_SOURCES")
+        if sources_json:
+            import json
+            try:
+                return json.loads(sources_json)
+            except json.JSONDecodeError:
+                logger.warning("Failed to parse MACRO_RSS_SOURCES, using defaults")
+        return DEFAULT_RSS_SOURCES
+
+    async def _get_client(self) -> httpx.AsyncClient:
+        """Get or create HTTP client."""
+        if self._client is None:
+            self._client = httpx.AsyncClient(
+                timeout=httpx.Timeout(10.0),
+                follow_redirects=True,
+                headers={"User-Agent": "TradeSync-MacroFeed/1.0"}
+            )
+        return self._client
+
+    async def close(self):
+        """Close HTTP client."""
+        if self._client:
+            await self._client.aclose()
+            self._client = None
+
+    def cache_age_seconds(self) -> Optional[float]:
+        """How old the cached headlines are, or None if there are none."""
+        return None if not self.cache else time.time() - self.cache_updated_at
+
+    def is_stale(self) -> bool:
+        age = self.cache_age_seconds()
+        return age is None or age >= CACHE_TTL_SECONDS
+
+    async def fetch_headlines(self, force_refresh: bool = False) -> List[MacroHeadline]:
+        """Return headlines, without blocking a read on external feeds.
+
+        **Stale-while-revalidate.** A fresh cache is returned. A stale cache is
+        also returned — immediately — and a refresh is started in the
+        background. Only a completely cold cache waits, because then there is
+        genuinely nothing to serve.
+
+        The reason: this reads three external RSS feeds with a 10-second
+        timeout each. Before this change, the first request after the TTL
+        expired paid that cost, and every concurrent request queued behind it on
+        the lock. A dashboard panel would hang for seconds at a time, on a
+        schedule, for news.
+
+        This system has already been bitten by exactly this shape once — a read
+        path that grew an external dependency and started exceeding a caller's
+        timeout. Stale news labelled as stale is strictly better than a request
+        that does not return.
+        """
+        now = time.time()
+
+        if not force_refresh and self.cache:
+            if (now - self.cache_updated_at) < CACHE_TTL_SECONDS:
+                return self.cache
+            # Stale but present: serve it and refresh behind the response.
+            self._schedule_refresh()
+            return self.cache
+
+        # Acquire lock to prevent concurrent fetches
+        async with self.fetch_lock:
+            # Double-check after acquiring lock
+            if not force_refresh and self.cache and (time.time() - self.cache_updated_at) < CACHE_TTL_SECONDS:
+                return self.cache
+
+            headlines = []
+            client = await self._get_client()
+
+            # Fetch from all sources concurrently
+            tasks = [
+                self._fetch_source(client, source)
+                for source in self.sources
+            ]
+
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+
+            for result in results:
+                if isinstance(result, Exception):
+                    logger.warning(f"Failed to fetch source: {result}")
+                    continue
+                headlines.extend(result)
+
+            # Sort by published date (most recent first)
+            headlines.sort(
+                key=lambda h: h.published_at or "",
+                reverse=True
+            )
+
+            # Limit total headlines
+            headlines = headlines[:MAX_TOTAL_HEADLINES]
+
+            # Update cache
+            self.cache = headlines
+            self.cache_updated_at = now
+
+            return headlines
+
+    def _schedule_refresh(self) -> None:
+        """Start one background refresh, and only one.
+
+        A stale cache being read by ten callers must not start ten refreshes.
+        The task handle is kept so a second call while one is in flight does
+        nothing.
+        """
+        if self._refresh_task is not None and not self._refresh_task.done():
+            return
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return
+        self._refresh_task = loop.create_task(self._refresh_quietly())
+
+    async def _refresh_quietly(self) -> None:
+        """Refresh in the background. A failure leaves the stale cache in place.
+
+        Deliberately swallows: nobody is waiting on this, and a failed
+        background refresh must not become an unhandled task exception. The
+        staleness is already visible to callers through the status block.
+        """
+        try:
+            await self.fetch_headlines(force_refresh=True)
+        except Exception as exc:
+            logger.warning(f"Background macro refresh failed: {exc}")
+
+    async def _fetch_source(
+        self,
+        client: httpx.AsyncClient,
+        source: Dict[str, str]
+    ) -> List[MacroHeadline]:
+        """Fetch headlines from a single RSS source."""
+        headlines = []
+
+        try:
+            response = await client.get(source["url"])
+            response.raise_for_status()
+
+            # Parse RSS/Atom feed
+            root = ET.fromstring(response.text)
+
+            # Handle RSS 2.0
+            items = root.findall(".//item")
+            if not items:
+                # Handle Atom
+                items = root.findall(".//{http://www.w3.org/2005/Atom}entry")
+
+            for item in items[:MAX_HEADLINES_PER_SOURCE]:
+                headline = self._parse_item(item, source)
+                if headline:
+                    headlines.append(headline)
+
+        except httpx.HTTPError as e:
+            logger.warning(f"HTTP error fetching {source['name']}: {e}")
+        except ET.ParseError as e:
+            logger.warning(f"XML parse error for {source['name']}: {e}")
+        except Exception as e:
+            logger.warning(f"Error fetching {source['name']}: {e}")
+
+        return headlines
+
+    def _parse_item(
+        self,
+        item: ET.Element,
+        source: Dict[str, str]
+    ) -> Optional[MacroHeadline]:
+        """Parse an RSS item or Atom entry into a MacroHeadline (see macro_feed_parsing)."""
+        return parse_item(item, source)
+
+    def _detect_sentiment(
+        self,
+        title: str,
+        description: Optional[str] = None
+    ) -> Optional[str]:
+        """Keyword sentiment for one headline (see macro_feed_parsing)."""
+        return detect_sentiment(title, description)
+
+    def get_status(self) -> Dict[str, Any]:
+        """Service status, including whether what you just read was stale.
+
+        A reader has no way to tell a fresh answer from a stale one by looking
+        at the headlines, so the answer says. Serving stale content is fine;
+        serving it silently is not.
+        """
+        age = self.cache_age_seconds()
+        return {
+            "sources_configured": len(self.sources),
+            "headlines_cached": len(self.cache),
+            "cache_age_seconds": round(age, 1) if age is not None else None,
+            "cache_ttl_seconds": CACHE_TTL_SECONDS,
+            "stale": self.is_stale(),
+            "refresh_in_flight": (
+                self._refresh_task is not None and not self._refresh_task.done()
+            ),
+            "sources": [s["name"] for s in self.sources]
+        }
+
+
+# Global instance
+macro_feed = MacroFeedService()

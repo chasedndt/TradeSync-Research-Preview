@@ -1,0 +1,39 @@
+.body { display: grid; gap: 12px; padding: 14px 17px 16px; min-width: 0; }
+.note { margin: 0; color: var(--muted); font-size: 11.5px; line-height: 1.5; overflow-wrap: anywhere; }
+.text { margin: 0; color: #d3dbe8; font-size: 12.5px; line-height: 1.5; }
+.warn { margin: 0; color: var(--amber); font-size: 12px; line-height: 1.5; }
+
+.standings { margin: 0; display: grid; gap: 10px; }
+.standings > div { display: grid; grid-template-columns: minmax(130px, 200px) minmax(0, 1fr); gap: 2px 14px; align-items: baseline; }
+.standings dt { color: var(--muted); font-size: 12px; }
+.standings dd { margin: 0; font-size: 12.5px; overflow-wrap: anywhere; }
+.standings dd + dd { grid-column: 2; color: var(--muted); font-size: 11.5px; line-height: 1.45; }
+.value { font: 600 12.5px var(--font-mono); }
+
+.table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.table th, .table td { text-align: left; padding: 7px 10px 7px 0; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
+.table thead th { color: var(--muted); font-weight: 500; font-size: 11px; }
+.table tbody th { font-weight: 600; }
+.mono { font-family: var(--font-mono); }
+.sub { display: block; margin-top: 2px; color: var(--muted); font: 10.5px var(--font-mono); }
+
+.list { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.item { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 14px; padding: 8px 0; border-bottom: 1px solid var(--border-soft); }
+.item strong { font-size: 12.5px; }
+.links { display: flex; gap: 12px; font-size: 12px; }
+.links a { color: var(--blue); }
+
+.inline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.address { flex: 1 1 220px; min-width: 0; }
+.details summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+.details[open] summary { margin-bottom: 8px; }
+.details > * + * { margin-top: 8px; }
+
+.stack { display: grid; gap: 8px; min-width: 0; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.toolbar h4 { margin: 0; font-size: 13px; }
+
+@media (max-width: 640px) {
+  .standings > div { grid-template-columns: minmax(0, 1fr); }
+  .standings dd + dd { grid-column: 1; }
+}

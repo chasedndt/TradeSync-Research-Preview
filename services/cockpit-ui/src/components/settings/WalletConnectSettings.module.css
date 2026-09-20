@@ -1,0 +1,13 @@
+.text { margin: 0 0 10px; color: #d1d5db; font-size: 13px; line-height: 1.55; }
+.text a, .steps a { color: #60a5fa; text-decoration: underline; }
+.steps { margin: 0 0 12px; padding-left: 20px; list-style: decimal; color: #d1d5db; font-size: 13px; line-height: 1.6; }
+.current { margin: 0 0 12px; color: #e5e7eb; font-size: 13px; overflow-wrap: anywhere; }
+.id { font-family: var(--font-mono); color: #f3f4f6; }
+.form { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.field { display: grid; gap: 6px; flex: 1 1 240px; min-width: 0; color: #9ca3af; font-size: 12px; }
+.field input { width: 100%; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.message { margin: 10px 0 0; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.history { margin-top: 12px; color: #9ca3af; font-size: 12px; }
+.history summary { cursor: pointer; }
+.history ul { margin: 6px 0 0; padding-left: 18px; list-style: disc; }

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TradeSync Cockpit — no connection</title>
+    <style>
+      :root { color-scheme: dark; }
+      body {
+        margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        background: #07111f; color: #e8edf5; padding: 24px;
+        font-family: 'Segoe UI Variable', 'Segoe UI', Inter, ui-sans-serif, system-ui, sans-serif;
+      }
+      main { max-width: 34rem; }
+      h1 { font-size: 1.25rem; margin: 0 0 12px; }
+      p { margin: 0 0 12px; line-height: 1.6; color: #93a0b4; }
+      strong { color: #e8edf5; font-weight: 600; }
+      button {
+        margin-top: 8px; padding: 8px 14px; border-radius: 6px; border: 1px solid #263548;
+        background: #101d2d; color: #e8edf5; font: inherit; cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>TradeSync Cockpit cannot reach the dashboard</h1>
+      <p>
+        This phone or PC has no route to state-api right now. <strong>No market price, position or paper number is
+        shown on this page</strong>, because a stored copy of any of them would be out of date the moment it was
+        stored.
+      </p>
+      <p>Reconnect to the network, or to the machine running TradeSync, and try again.</p>
+      <button type="button" onclick="window.location.reload()">Try again</button>
+    </main>
+  </body>
+</html>

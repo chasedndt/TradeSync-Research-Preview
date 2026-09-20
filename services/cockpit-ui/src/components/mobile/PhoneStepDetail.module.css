@@ -1,0 +1,4 @@
+.detail { min-width: 0; margin: 4px 0 0; color: #cbd5e1; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.detail p { margin: 4px 0; }
+.links { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 4px 0 0; padding: 0; list-style: none; }
+.links a { color: #60a5fa; text-decoration: underline; }

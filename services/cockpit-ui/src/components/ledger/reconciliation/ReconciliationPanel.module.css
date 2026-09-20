@@ -1,0 +1,49 @@
+.panel {
+  display: grid;
+  gap: 14px;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.header h3 {
+  margin: 0 0 6px;
+}
+
+.header p {
+  max-width: 72ch;
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.controls select {
+  margin-left: 6px;
+}
+
+.window {
+  margin: 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 12px;
+}
+
+.note {
+  margin: 0;
+  font-size: 12px;
+}

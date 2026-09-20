@@ -1,0 +1,47 @@
+.headActions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.reading { color: var(--muted); font: 11px var(--font-mono); overflow-wrap: anywhere; }
+
+.body { display: grid; gap: 14px; padding: 14px 17px 16px; }
+.warn { margin: 0; padding: 12px 17px; color: var(--amber); font-size: 12px; }
+.note { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+
+.condition { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 14px; }
+.conditionLabel { font-size: 20px; font-weight: 700; line-height: 1.1; }
+.conditionMeta { color: var(--muted); font-size: 12px; }
+
+.level { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border-radius: 3px; background: var(--panel-muted); font: 600 11px var(--font-mono); letter-spacing: 0.04em; }
+
+.bar { height: 5px; border-radius: 3px; background: var(--panel-muted); overflow: hidden; }
+.barFill { display: block; height: 100%; background: var(--green); }
+.barFillWarn { background: var(--amber); }
+.barFillBad { background: var(--red); }
+
+.section { display: grid; gap: 7px; }
+.sectionTitle { margin: 0; font-size: 12px; font-weight: 600; color: #cfd8e6; }
+
+.reasons { margin: 0; padding-left: 18px; display: grid; gap: 5px; font-size: 12px; line-height: 1.5; color: #d3dbe8; }
+.reasons li::marker { color: var(--amber); }
+
+.missing { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.missingItem { display: grid; gap: 2px; padding: 8px 10px; border-left: 2px solid var(--amber); background: var(--panel-muted); border-radius: 0 3px 3px 0; }
+.missingName { font-size: 12px; font-weight: 600; }
+.missingReason { color: var(--muted); font-size: 11px; line-height: 1.45; }
+
+.table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.table th, .table td { text-align: left; padding: 7px 10px 7px 0; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
+.table th { color: var(--muted); font-weight: 500; font-size: 11px; }
+.table tbody th { color: var(--text); font-weight: 600; }
+.regimeCell { font-family: var(--font-mono); }
+.sourceCell { color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+.reasonRow td { padding-top: 0; border-bottom: 1px solid var(--border-soft); color: var(--muted); font-size: 11px; line-height: 1.45; }
+
+.transitions { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font: 11.5px var(--font-mono); }
+.transitions li { display: flex; flex-wrap: wrap; gap: 8px; }
+.transitionAt { color: var(--muted); }
+
+.empty { margin: 0; color: var(--muted); font-size: 12px; }
+
+@media (max-width: 640px) {
+  .table th, .table td { padding-right: 6px; }
+  .conditionLabel { font-size: 17px; }
+}

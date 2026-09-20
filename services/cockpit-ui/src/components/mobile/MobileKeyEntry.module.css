@@ -1,0 +1,3 @@
+.entry { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; margin: 8px 0; }
+.field { display: grid; flex: 1 1 220px; gap: 4px; min-width: 0; color: #9ca3af; font-size: 12px; }
+.field input { width: 100%; }

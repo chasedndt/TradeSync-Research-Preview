@@ -1,0 +1,292 @@
+"""Scheduled economic events, normalised into one card shape.
+
+Two feeds, kept apart by ``source`` so the operator can see which one a line
+came from:
+
+- **ForexFactory** publishes a weekly JSON (``ff_calendar_thisweek.json``) with
+  title, currency, an ISO date carrying a UTC offset, an impact rating and the
+  forecast/previous figures. Its terms are not published; it is treated as a
+  courtesy feed — fetched no more than hourly, cached, and expected to change.
+- **FRED** ``releases/dates`` (with ``include_release_dates_with_no_data``)
+  lists upcoming official US release dates. Needs the same free key the FRED
+  macro provider already wants; dates only, no time of day.
+
+Context only. Nothing here reaches the feature catalog. A pulled payload is
+still untrusted: every event is validated field by field and a malformed one
+is dropped and counted, never defaulted — an event at a guessed time is worse
+than no event.
+"""
+
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from typing import Any, Iterable, Mapping, Sequence
+
+from tradesync_core.event_reactions import EVENT_KINDS
+
+IMPACTS = ("High", "Medium", "Low", "Holiday")
+FF_FEED_URL = "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
+
+# Titles that matter for crypto whatever the impact rating says, matched
+# case-insensitively on word boundaries. ForexFactory abbreviates ("CPI m/m");
+# FRED spells release names out ("Consumer Price Index"), so both forms are
+# listed. Central-bank decisions and their speakers count whichever bank it
+# is; data releases count only as US releases, because Canada's or
+# Switzerland's CPI is not the print a BTC or ETH position sizes around.
+# "treasury" is not listed: it matched FRED's capital-flow and daily yield
+# series, not events.
+CENTRAL_BANK = ("fomc", "fed chair", "federal funds", "ecb", "boe", "boj", "rate decision", "rate statement")
+US_DATA = (
+    "cpi", "consumer price index", "core pce", "pce price", "personal income and outlays",
+    "non-farm", "nonfarm", "employment situation", "unemployment rate", "unemployment claims", "jobless claims",
+    "gdp", "gross domestic product", "ppi", "producer price index", "retail sales", "ism",
+)
+MARKET_MOVING = CENTRAL_BANK + US_DATA
+US_COUNTRIES = ("USD", "US")
+
+# FRED releases whose past reactions the thesis measures (CPI, PPI, jobs, retail
+# sales, GDP, PCE, jobless claims): market-moving by id, whatever FRED names them.
+MEASURED_FRED_RELEASES = frozenset(k.release_id for k in EVENT_KINDS.values() if k.release_id is not None)
+# A FRED release listed on this many dates inside the window is a data series
+# that updates daily ("Daily Treasury Inflation-Indexed Securities", "FOMC Press
+# Release", "Federal Funds Data"), not a scheduled event, whatever its name says.
+RECURRING_DATES = 3
+
+
+@dataclass(frozen=True)
+class EventCard:
+    title: str
+    country: str
+    impact: str
+    scheduled_at: str  # ISO 8601, UTC
+    minutes_until: int
+    source: str
+    forecast: str = ""
+    previous: str = ""
+    market_moving: bool = False
+    # Where to read more. ForexFactory has no per-event page in its feed, so
+    # the link is that day's calendar; FRED links the release calendar.
+    url: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "title": self.title,
+            "country": self.country,
+            "impact": self.impact,
+            "scheduled_at": self.scheduled_at,
+            "minutes_until": self.minutes_until,
+            "source": self.source,
+            "forecast": self.forecast,
+            "previous": self.previous,
+            "market_moving": self.market_moving,
+            "url": self.url,
+        }
+
+
+@dataclass
+class Normalised:
+    events: list[EventCard] = field(default_factory=list)
+    rejected: int = 0
+    rejections: list[str] = field(default_factory=list)
+
+
+def _keywords(words: Sequence[str]) -> re.Pattern[str]:
+    return re.compile(r"(?<![a-z])(" + "|".join(re.escape(k.strip()) for k in words) + r")(?![a-z])")
+
+
+_CENTRAL_BANK_RE = _keywords(CENTRAL_BANK)
+_US_DATA_RE = _keywords(US_DATA)
+
+
+def _is_market_moving(title: str, country: str = "USD") -> bool:
+    """Keyword match on word boundaries: a central bank anywhere, a data release in the US.
+
+    Plain substring matching flagged "CBOE Market Statistics" because "cboe"
+    contains "boe": a central bank inside an exchange's name.
+    """
+    text = title.lower()
+    if _CENTRAL_BANK_RE.search(text):
+        return True
+    return country.strip().upper() in US_COUNTRIES and bool(_US_DATA_RE.search(text))
+
+
+def _parse_iso(value: Any) -> datetime | None:
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    # A time with no offset would silently be read in server-local time and
+    # land on the wrong hour; refuse it rather than guess.
+    if parsed.tzinfo is None:
+        return None
+    return parsed.astimezone(timezone.utc)
+
+
+def normalise_forexfactory(
+    raw: Any,
+    now: datetime,
+    *,
+    horizon_hours: int = 24 * 8,
+    include_past_minutes: int = 60,
+) -> Normalised:
+    """Validate and convert the ForexFactory weekly feed.
+
+    Keeps events from ``include_past_minutes`` ago (so a release that just
+    happened is still visible) to ``horizon_hours`` ahead. Holidays are kept
+    but never marked market-moving.
+    """
+    out = Normalised()
+    if not isinstance(raw, list):
+        out.rejected = 1
+        out.rejections.append("feed body is not a list")
+        return out
+    now = now.astimezone(timezone.utc)
+    for index, item in enumerate(raw):
+        if not isinstance(item, Mapping):
+            out.rejected += 1
+            out.rejections.append(f"#{index}: not an object")
+            continue
+        title = item.get("title")
+        country = item.get("country")
+        impact = item.get("impact")
+        when = _parse_iso(item.get("date"))
+        if not isinstance(title, str) or not title.strip():
+            out.rejected += 1
+            out.rejections.append(f"#{index}: missing title")
+            continue
+        if not isinstance(country, str) or not country.strip():
+            out.rejected += 1
+            out.rejections.append(f"#{index}: missing country")
+            continue
+        if impact not in IMPACTS:
+            out.rejected += 1
+            out.rejections.append(f"#{index}: impact {impact!r} not in {IMPACTS}")
+            continue
+        if when is None:
+            out.rejected += 1
+            out.rejections.append(f"#{index}: date {item.get('date')!r} not ISO with offset")
+            continue
+        minutes = int((when - now).total_seconds() // 60)
+        if minutes < -include_past_minutes or minutes > horizon_hours * 60:
+            continue
+        out.events.append(
+            EventCard(
+                title=title.strip()[:120],
+                country=country.strip()[:8],
+                impact=impact,
+                scheduled_at=when.isoformat(),
+                minutes_until=minutes,
+                source="forexfactory",
+                forecast=str(item.get("forecast") or "")[:24],
+                previous=str(item.get("previous") or "")[:24],
+                market_moving=impact != "Holiday" and _is_market_moving(title, country),
+                url=f"https://www.forexfactory.com/calendar?day={when.strftime('%b').lower()}{when.day}.{when.year}",
+            )
+        )
+    out.events.sort(key=lambda e: e.scheduled_at)
+    return out
+
+
+def normalise_fred_release_dates(
+    raw: Any, now: datetime, *, horizon_days: int = 8
+) -> Normalised:
+    """Convert FRED ``releases/dates`` rows into date-only cards.
+
+    FRED gives a date, not a time; ``scheduled_at`` is midnight UTC of that
+    date and ``minutes_until`` counts to it, which the UI shows as a day, not
+    an hour. Rows without a release name or date are dropped.
+    """
+    out = Normalised()
+    rows = raw.get("release_dates") if isinstance(raw, Mapping) else None
+    if not isinstance(rows, list):
+        out.rejected = 1
+        out.rejections.append("no release_dates list")
+        return out
+    now = now.astimezone(timezone.utc)
+    kept: list[tuple[str, datetime, Any]] = []
+    for index, row in enumerate(rows):
+        if not isinstance(row, Mapping):
+            out.rejected += 1
+            continue
+        name = row.get("release_name")
+        date = row.get("date")
+        if not isinstance(name, str) or not isinstance(date, str):
+            out.rejected += 1
+            out.rejections.append(f"#{index}: missing release_name or date")
+            continue
+        try:
+            when = datetime.strptime(date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        except ValueError:
+            out.rejected += 1
+            out.rejections.append(f"#{index}: date {date!r} not YYYY-MM-DD")
+            continue
+        days = (when - now).total_seconds() / 86400
+        if days < -1 or days > horizon_days:
+            continue
+        kept.append((name.strip(), when, row.get("release_id")))
+    dates_by_name: dict[str, set[str]] = {}
+    for name, when, _ in kept:
+        dates_by_name.setdefault(name, set()).add(when.date().isoformat())
+    for name, when, release_id in kept:
+        recurring = len(dates_by_name[name]) >= RECURRING_DATES
+        moving = release_id in MEASURED_FRED_RELEASES or (not recurring and _is_market_moving(name))
+        out.events.append(
+            EventCard(
+                title=name[:120],
+                country="USD",
+                # FRED lists every release, daily fillers included ("Coinbase
+                # Cryptocurrencies", "CBOE Market Statistics", and series named
+                # after the Treasury or the FOMC that update every business day).
+                # Only measured releases, and keyword matches that are not daily,
+                # rank as Medium; the rest are Low, which the strip does not surface.
+                impact="Medium" if moving else "Low",
+                scheduled_at=when.isoformat(),
+                minutes_until=int((when - now).total_seconds() // 60),
+                source="fred",
+                market_moving=moving,
+                url="https://fred.stlouisfed.org/releases/calendar",
+            )
+        )
+    out.events.sort(key=lambda e: e.scheduled_at)
+    return out
+
+
+def merge(*parts: Normalised, limit: int = 80) -> dict[str, Any]:
+    """Combine feeds into the payload the context endpoint returns.
+
+    Cutting to ``limit`` keeps every High or market-moving event first and fills
+    the rest in time order. Cutting by time alone let two days of low-value rows
+    push the rest of the week, the FOMC decision included, out of the payload.
+    """
+    events: list[EventCard] = []
+    rejected = 0
+    rejections: list[str] = []
+    for part in parts:
+        events.extend(part.events)
+        rejected += part.rejected
+        rejections.extend(part.rejections[:5])
+    order = lambda e: (e.scheduled_at, e.source)  # noqa: E731
+    events.sort(key=order)
+    important = [e for e in events if e.impact == "High" or e.market_moving]
+    others = [e for e in events if not (e.impact == "High" or e.market_moving)]
+    shown = sorted(important[:limit] + others[: max(0, limit - len(important))], key=order)
+    upcoming = [e for e in events if e.minutes_until >= 0]
+    return {
+        "metric_family": "economic_calendar",
+        "events": [e.to_dict() for e in shown],
+        "next_market_moving": next(
+            (e.to_dict() for e in upcoming if e.market_moving), None
+        ),
+        "counts": {
+            "total": len(events),
+            "high": sum(1 for e in events if e.impact == "High"),
+            "market_moving": sum(1 for e in events if e.market_moving),
+            "rejected": rejected,
+        },
+        "rejections": rejections[:10],
+        "sources": sorted({e.source for e in events}),
+    }

@@ -1,0 +1,16 @@
+.page { width: 100%; max-width: 1180px; margin: 0 auto; display: grid; gap: 22px; min-width: 0; }
+
+.header { display: grid; gap: 6px; }
+.title { margin: 0; font-size: 20px; font-weight: 700; }
+.lead { margin: 0; max-width: 900px; color: var(--muted); font-size: 12.5px; line-height: 1.55; }
+
+.section { display: grid; gap: 12px; min-width: 0; }
+.sectionTitle {
+  margin: 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-soft);
+  color: #cfd8e6;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}

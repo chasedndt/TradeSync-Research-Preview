@@ -1,0 +1,277 @@
+services:
+  postgres:
+    restart: unless-stopped
+    mem_limit: 768m
+    mem_reservation: 384m
+    cpus: 0.50
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+  redis:
+    restart: unless-stopped
+    # 160mb filled on 2026-09-14 (seven days of 15 s feature series) and, with
+    # noeviction, every market-data write failed until it was raised. Durable
+    # history belongs in Postgres; Redis holds the hot window.
+    mem_limit: 1g
+    mem_reservation: 256m
+    # At 0.25 CPU (and with RDB snapshots on top of the append-only log, one
+    # every ~108 s taking up to 42 s) writes queued and a market-data pass grew
+    # from ~15 s to over a minute. The append-only log is the persistence.
+    cpus: 1.0
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --save
+      - ""
+      - --maxmemory
+      - 700mb
+      - --maxmemory-policy
+      - noeviction
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+  market-data:
+    restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 256m
+    cpus: 1.0
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+  ingest-gateway:
+    restart: unless-stopped
+    mem_limit: 384m
+    mem_reservation: 192m
+    cpus: 0.50
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/healthz', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+  core-scorer:
+    restart: unless-stopped
+    mem_limit: 384m
+    mem_reservation: 192m
+    cpus: 0.50
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+  fusion-engine:
+    restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 0.75
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+  state-api:
+    restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 0.75
+    environment:
+      # core-scorer and fusion-engine are required for Tier A, so the inspector
+      # probes them by default: when they are not running the honest report is
+      # "offline", not "not configured". ingest-gateway serves the legacy
+      # events path, is not required for Tier A, and stays unset until it is
+      # intentionally admitted. Any of these can be overridden or blanked.
+      INGEST_GATEWAY_URL: ${PIPELINE_INGEST_GATEWAY_URL:-}
+      # TradingView (and Strike Zone Pine) webhook. Empty by default: an
+      # unauthenticated public endpoint into a trading system is not an
+      # acceptable default, and TradingView cannot send auth headers so
+      # the secret must travel in the alert body.
+      TRADINGVIEW_WEBHOOK_SECRET: ${TRADINGVIEW_WEBHOOK_SECRET:-}
+      # The public address the tunnel exposes; shown on the pipeline, never used to send.
+      TRADINGVIEW_PUBLIC_URL: ${TRADINGVIEW_PUBLIC_URL:-}
+      # cloudflared's fixed pine-ingress address (ops/compose.ingress.yml): a peer
+      # whose CF-Connecting-IP the webhook believes (L2). "off" in
+      # TRADINGVIEW_SOURCE_CHECK switches the source check off, for rollback only.
+      TRADINGVIEW_INGRESS_PEERS: ${TRADINGVIEW_INGRESS_PEERS:-172.29.53.10}
+      # The connector by its service name, resolved for each alert, so the check holds
+      # wherever cloudflared runs: the shared network until it is recreated, then pine-ingress.
+      TRADINGVIEW_INGRESS_HOSTS: ${TRADINGVIEW_INGRESS_HOSTS:-cloudflared}
+      TRADINGVIEW_SOURCE_CHECK: ${TRADINGVIEW_SOURCE_CHECK:-}
+      # Separate control authorization for mobile enrollment/test sends.
+      # Empty means disabled. Never use a wallet key here.
+      MOBILE_ALERTS_CONTROL_KEY: ${MOBILE_ALERTS_CONTROL_KEY:-}
+      # Web Push (VAPID) key pair and the sender's contact. Empty keys mean a
+      # browser cannot subscribe; an empty contact means alerts keep going through
+      # ntfy (Apple refuses a push without one). The private key signs each push
+      # and is never returned, logged or displayed; the contact is never returned
+      # either. Generated and set on the operator's PC (docs/runbooks/MOBILE_ALERTS.md).
+      MOBILE_WEB_PUSH_VAPID_PUBLIC_KEY: ${MOBILE_WEB_PUSH_VAPID_PUBLIC_KEY:-}
+      MOBILE_WEB_PUSH_VAPID_PRIVATE_KEY: ${MOBILE_WEB_PUSH_VAPID_PRIVATE_KEY:-}
+      MOBILE_WEB_PUSH_SUBJECT: ${MOBILE_WEB_PUSH_SUBJECT:-}
+      # Operator token for every change (POST/PUT/PATCH/DELETE); empty keeps
+      # today's behaviour. See docs/changes/2026-09-15_local-access-hardening.md
+      # before setting it: core-scorer and discord-reader read the same value.
+      STATE_API_OPERATOR_TOKEN: ${STATE_API_OPERATOR_TOKEN:-}
+      # Browser origins allowed to make changes beyond the Cockpit on
+      # http://127.0.0.1:3000 and http://localhost:3000, comma-separated.
+      STATE_API_ALLOWED_ORIGINS: ${STATE_API_ALLOWED_ORIGINS:-}
+      # Host names served beyond 127.0.0.1, localhost and state-api ("*" turns
+      # the check off), and the tunnel hostname, served on /webhook/tradingview
+      # only (L1, app/host_guard.py).
+      STATE_API_ALLOWED_HOSTS: ${STATE_API_ALLOWED_HOSTS:-}
+      STATE_API_TUNNEL_HOSTS: ${STATE_API_TUNNEL_HOSTS:-tradesync-pine.chaseintech.com}
+      # Sent with every order state-api routes to exec-hl-svc, which refuses
+      # orders without it (L6). Same value as exec-hl-svc; never the signer's.
+      EXEC_HL_CALLER_TOKEN: ${EXEC_HL_CALLER_TOKEN:-}
+      # FRED (free key from https://fredaccount.stlouisfed.org/apikeys). Set both
+      # in runtime.env; the key is read here only, never printed. Enables the
+      # macro-reference provider and adds official release dates to the
+      # Mission Control events strip.
+      FRED_API_KEY: ${FRED_API_KEY:-}
+      FRED_CONTEXT_ENABLED: ${FRED_CONTEXT_ENABLED:-false}
+      CORE_SCORER_URL: ${PIPELINE_CORE_SCORER_URL:-http://core-scorer:8000}
+      FUSION_ENGINE_URL: ${PIPELINE_FUSION_ENGINE_URL:-http://fusion-engine:8002}
+      # state-api reports dry_run on paths where nothing reached a venue. Same
+      # variable and same value as exec-hl-svc, so the two cannot disagree about
+      # which mode the system is in.
+      DRY_RUN: "true"
+      # Advisory agent harness (Hermes / OpenClaw / a local Ollama). Unset by
+      # default: a harness is optional and TradeSync must work without one.
+      # The boundary is enforced in code — a response carrying a score,
+      # direction, approval or order field is refused by name, and every
+      # accepted answer is filed in quarantine, never in evidence.
+      # host.docker.internal reaches a runtime on the operator's machine.
+      AGENT_HARNESS_URL: ${AGENT_HARNESS_URL:-}
+      AGENT_HARNESS_MODEL: ${AGENT_HARNESS_MODEL:-llama3.1:8b}
+      # "ollama" (default) or "openai": the Hermes gateway's API server speaks
+      # the OpenAI dialect at http://host.docker.internal:8642 with a Bearer
+      # key (its API_SERVER_KEY, copied file-to-file into runtime.env as
+      # AGENT_HARNESS_KEY; never displayed, never logged).
+      AGENT_HARNESS_API: ${AGENT_HARNESS_API:-ollama}
+      AGENT_HARNESS_KEY: ${AGENT_HARNESS_KEY:-}
+      # The isolated signer and the account to preview. The address is public;
+      # the key that controls it lives only in signer-svc's own environment and
+      # never appears in this service.
+      SIGNER_URL: ${SIGNER_URL:-http://signer-svc:8006}
+      WALLET_ADDRESS: ${WALLET_ADDRESS:-}
+      # ChaseOS knowledge-graph snapshots. Unset by default: a knowledge
+      # connector that switches itself on because a path happens to exist is a
+      # connector the operator did not choose to run. Set
+      # CHASEOS_GRAPH_HOST_DIR to the vault's .chaseos/graph directory to
+      # enable it; the mount below is :ro, so nothing here can write canonical
+      # knowledge even if the code tried to.
+      CHASEOS_GRAPH_DIR: ${CHASEOS_GRAPH_DIR:-}
+      # Where the host renderer writes edition narration and video; mounted
+      # read-only below. Served only by name under /state/thesis/editions.
+      EDITIONS_DIR: /editions
+      THESIS_EDITION_TZ: ${THESIS_EDITION_TZ:-Europe/London}
+      THESIS_EDITION_SCHEDULE: ${THESIS_EDITION_SCHEDULE:-ny-premarket=12:00,ny-midday=17:30,session-handoff=23:30}
+      # Charts of the StrikeZone quant lab's trade calls and outcomes, copied by
+      # tools/strikezone_quant_bridge.py; mounted read-only below, served by name.
+      STRIKEZONE_CHARTS_DIR: /strikezone-charts
+    volumes:
+      # Bound to a harmless default so the compose file is valid whether or not
+      # the connector is configured. Read-only in every case.
+      - ${CHASEOS_GRAPH_HOST_DIR:-./sql}:/knowledge/chaseos-graph:ro
+      - ${EDITIONS_HOST_DIR:-./sql}:/editions:ro
+      - ${STRIKEZONE_CHARTS_HOST_DIR:-./sql}:/strikezone-charts:ro
+    extra_hosts:
+      # Docker Desktop resolves this already; declaring it keeps the same
+      # compose file working against a Linux engine, where it does not.
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+  qdrant:
+    profiles: [evidence]
+    mem_limit: 768m
+    mem_reservation: 384m
+    cpus: 0.50
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+  cockpit-ui:
+    profiles: [operator]
+    # Back after a Docker restart like every other service; without it the dashboard stayed down.
+    restart: unless-stopped
+    mem_limit: 256m
+    mem_reservation: 128m
+    cpus: 0.25
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+  exec-hl-svc:
+    profiles: [paper-exec]
+    restart: unless-stopped
+    mem_limit: 384m
+    mem_reservation: 192m
+    cpus: 0.50
+    environment:
+      DRY_RUN: "true"
+      EXECUTION_ENABLED: "false"
+      # Orders are answered only for the caller presenting this token, state-api (L6).
+      EXEC_HL_CALLER_TOKEN: ${EXEC_HL_CALLER_TOKEN:-}
+      # The one service that may ask the signer for a signature, and it sends
+      # nothing without this token (app/signer_client.py). Same value as signer-svc.
+      SIGNER_CALLER_TOKEN: ${SIGNER_CALLER_TOKEN:-}
+      SIGNER_URL: ${SIGNER_URL:-http://signer-svc:8006}
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+  backtest-runner:
+    profiles: [analytics]
+    mem_limit: 2g
+    mem_reservation: 512m
+    cpus: 2.00
+    logging:
+      driver: json-file
+      options: {max-size: "20m", max-file: "3"}
+
+  # Reads the ChaseOS agent channels (Hermes fleet, Strike Zone alerts) on the
+  # operator's private Discord into quarantine, with provenance. Read-only:
+  # it never posts to Discord, never talks to a model, never touches the
+  # catalog. Idle unless DISCORD_BOT_TOKEN and DISCORD_READER_CHANNELS are set
+  # in runtime.env (the token via tools/set-runtime-secret.ps1, never in git).
+  # DISCORD_READER_CHANNELS is "label=channel_id[:kind],..." with kind one of
+  # agent | alerts | operator.
+  discord-reader:
+    build:
+      context: ..
+      dockerfile: services/discord-reader/Dockerfile
+    restart: unless-stopped
+    mem_limit: 128m
+    mem_reservation: 64m
+    cpus: 0.10
+    environment:
+      STATE_API_URL: http://state-api:8000
+      STATE_API_OPERATOR_TOKEN: ${STATE_API_OPERATOR_TOKEN:-}
+      REDIS_URL: redis://redis:6379
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:-}
+      DISCORD_READER_CHANNELS: ${DISCORD_READER_CHANNELS:-}
+      DISCORD_POLL_SECONDS: ${DISCORD_POLL_SECONDS:-30}
+    depends_on:
+      redis:
+        condition: service_healthy
+      state-api:
+        condition: service_started
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}

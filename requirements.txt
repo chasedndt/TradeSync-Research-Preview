@@ -1,0 +1,45 @@
+# === Core Data & ML Stack ===
+pandas
+numpy
+scikit-learn
+ta
+yfinance
+
+# === LLM & Agent Tools ===
+openai
+langchain
+openai-whisper
+
+# === Backend API + Frontend Dev ===
+fastapi[all]
+streamlit
+uvicorn
+
+# === Webhooks & Integration ===
+requests
+discord-webhook
+
+# === Environment Config ===
+python-dotenv
+
+# === HTTP & Async Clients ===
+httpx
+
+# === On-Chain Execution SDKs ===
+hyperliquid-python-sdk
+websockets
+
+# === Database & Testing ===
+asyncpg
+pytest
+pytest-asyncio
+
+# Signing, for the tests that exercise tradesync_core[signing]. The extra is
+# installed only in signer-svc at runtime; this is here so a fresh checkout can
+# run the whole suite.
+eth-account==0.13.4
+msgpack==1.0.8
+
+# Web Push encryption and VAPID signing in state-api (services/state-api/requirements.txt).
+# eth-account pulls it in already; pinned here so the state-api tests never depend on that.
+pycryptodome==3.23.0

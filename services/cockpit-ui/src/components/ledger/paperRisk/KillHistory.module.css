@@ -1,0 +1,11 @@
+.history { margin: 16px 0; min-width: 0; }
+.history h4 { margin: 0 0 6px; font-size: 14px; color: #e5edf7; }
+.history ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.history li {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; font-size: 13px; color: #e5edf7;
+  border-bottom: 1px solid #344154; padding-bottom: 6px;
+}
+.history p { color: var(--text-muted, #a7b5c7); line-height: 1.6; font-size: 13px; margin: 8px 0 0; }
+.when { color: var(--text-muted, #a7b5c7); font-variant-numeric: tabular-nums; }
+.what { flex: 1 1 260px; min-width: 0; }
+.who { color: var(--text-muted, #a7b5c7); }

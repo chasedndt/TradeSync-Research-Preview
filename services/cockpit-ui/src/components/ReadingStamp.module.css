@@ -1,0 +1,2 @@
+.stamp { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.time { color: var(--muted); font: 11px var(--font-mono); overflow-wrap: anywhere; }

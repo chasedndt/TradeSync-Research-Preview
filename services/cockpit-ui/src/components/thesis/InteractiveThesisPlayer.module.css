@@ -1,0 +1,86 @@
+.player { overflow: hidden; }
+.head { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+.head h3 { margin: 0; font-size: 15px; color: #f4f7fb; }
+.head p { margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.mode { flex: 0 0 auto; display: grid; justify-items: end; gap: 4px; font: 700 9px var(--font-mono); letter-spacing: .08em; color: var(--green); }
+.mode span:last-child { color: var(--dim); font-weight: 500; letter-spacing: 0; }
+.headActions { display: flex; align-items: center; gap: 12px; }
+.fullscreenButton { min-height: 34px; display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid #405a76; border-radius: 5px; background: #102034; color: #dce7f4; cursor: pointer; font-size: 10px; }
+.fullscreenButton:hover { border-color: #6b91b9; background: #162a43; }
+.body { display: grid; grid-template-columns: minmax(0, 1fr) 360px; min-height: 630px; }
+.stage { min-width: 0; padding: 14px; border-right: 1px solid var(--border); }
+.chartHead { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+.chartHead strong { font-size: 14px; }
+.chartHead span { color: var(--muted); font: 10px var(--font-mono); }
+.overlayToggle { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: #aebcd0; font: 10px var(--font-mono); cursor: pointer; }
+.overlayToggle input { accent-color: #5aa0ff; }
+.chart { position: relative; min-height: 500px; border: 1px solid #24364d; border-radius: 6px; overflow: hidden; background: #081321; }
+.chartBadge { position: absolute; z-index: 4; left: 12px; top: 12px; display: grid; gap: 3px; max-width: min(420px, calc(100% - 24px)); padding: 9px 11px; border: 1px solid rgba(90, 160, 255, .35); border-radius: 5px; background: rgba(8, 19, 33, .91); pointer-events: none; animation: enter .32s ease-out; }
+.chartBadge strong { font-size: 12px; color: #f6f8fb; }
+.chartBadge span { color: #9fb0c5; font-size: 10px; line-height: 1.45; }
+.riskOverlay { position: absolute; inset: 0 62px 0 0; z-index: 3; pointer-events: none; overflow: hidden; }
+.rewardZone, .riskZone { position: absolute; left: var(--plan-left); width: var(--plan-width); min-height: 2px; border-left: 2px solid; border-right: 1px solid; }
+.rewardZone { top: min(var(--entry-y), var(--target-y)); height: max(2px, calc(max(var(--entry-y), var(--target-y)) - min(var(--entry-y), var(--target-y)))); }
+.riskZone { top: min(var(--entry-y), var(--stop-y)); height: max(2px, calc(max(var(--entry-y), var(--stop-y)) - min(var(--entry-y), var(--stop-y)))); }
+.rewardZone { background: rgba(43, 210, 135, .18); border-color: rgba(43, 210, 135, .8); }
+.riskZone { background: rgba(255, 79, 91, .18); border-color: rgba(255, 79, 91, .8); }
+.rewardZone span, .riskZone span, .entryLine span { position: absolute; right: 5px; padding: 3px 6px; border: 1px solid rgba(255,255,255,.12); border-radius: 3px; background: rgba(5, 13, 23, .94); box-shadow: 0 3px 10px rgba(0,0,0,.32); color: #eef4fb; font: 700 8px var(--font-mono); white-space: nowrap; }
+/* Keep labels readable when a real stop is only a few pixels from entry.
+   The zones remain locked to price coordinates; only the labels fan outward. */
+.rewardZone span { bottom: 0; color: #8cf0bd; transform: translateY(calc(100% + 4px)); }
+.riskZone span { top: 0; color: #ff9ba3; transform: translateY(calc(-100% - 4px)); }
+.entryLine { position: absolute; left: var(--plan-left); top: var(--entry-y); width: var(--plan-width); border-top: 1px solid #e9f0fa; }
+.entryLine span { top: 0; right: 5px; transform: translateY(-50%); }
+.paperMarker { color: var(--amber) !important; font-family: var(--font-mono); }
+.liveCaption { position: absolute; z-index: 5; left: 8%; right: 8%; bottom: 24px; display: grid; grid-template-columns: auto minmax(0,1fr); gap: 10px; align-items: start; padding: 10px 13px; border: 1px solid rgba(90,160,255,.42); border-radius: 7px; background: rgba(4,11,20,.88); box-shadow: 0 10px 30px rgba(0,0,0,.35); backdrop-filter: blur(5px); pointer-events: none; }
+.liveCaption span { color: #77b4ff; font: 9px var(--font-mono); padding-top: 2px; }.liveCaption p { margin: 0; color: #f2f6fb; font-size: 12px; line-height: 1.55; }
+.empty { min-height: 500px; display: grid; place-items: center; color: var(--muted); font-size: 12px; }
+.side { min-width: 0; height: 630px; box-sizing: border-box; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 14px; background: #0b1725; }
+.controls { display: grid; grid-template-columns: auto auto 1fr auto; gap: 7px; align-items: center; }
+.control { min-height: 34px; padding: 0 11px; border: 1px solid #32465f; border-radius: 4px; background: #101f31; color: #e8edf5; cursor: pointer; }
+.control:hover { border-color: #5aa0ff; }
+.play { color: #06100c; background: var(--green); border-color: var(--green); font-weight: 700; }
+.time { color: var(--muted); font: 10px var(--font-mono); white-space: nowrap; }
+.progress { width: 100%; accent-color: #5aa0ff; }
+.label { margin: 0 0 6px; color: var(--dim); font: 700 9px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+.chips { display: flex; gap: 5px; flex-wrap: wrap; }
+.chip { padding: 5px 8px; border: 1px solid #2a3d54; border-radius: 3px; background: #0d1a2a; color: #9fb0c5; font: 600 10px var(--font-mono); cursor: pointer; }
+.chip:hover, .chipActive { color: #fff; border-color: #5aa0ff; background: rgba(90, 160, 255, .14); }
+.chapter { padding: 11px 12px; border: 1px solid #2a3d54; border-radius: 5px; background: #0d1a2a; animation: enter .32s ease-out; }
+.chapter strong { display: block; margin-bottom: 5px; font-size: 13px; }
+.chapter p { margin: 0; color: #b7c2d0; font-size: 11px; line-height: 1.55; max-height: 125px; overflow-y: auto; }
+.lens { display: grid; gap: 7px; padding: 11px 12px; border: 1px solid rgba(90,160,255,.28); border-radius: 5px; background: rgba(90,160,255,.055); }
+.lensHead { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.lensHead strong { font-size: 12px; }.lensHead span, .lens small { color: var(--muted); font: 9px var(--font-mono); line-height: 1.45; }
+.lens p { margin: 0; color: #bdc9d8; font-size: 10px; line-height: 1.45; }
+.probabilities { display: flex; height: 7px; overflow: hidden; border-radius: 4px; background: #1b2736; }
+.probUp { background: var(--green); }.probRange { background: var(--amber); }.probDown { background: var(--red); }
+.probLabels { display: flex; justify-content: space-between; gap: 7px; font: 8px var(--font-mono); color: #ccd7e5; }
+.structure { display: grid; gap: 4px; padding: 9px 11px; border-left: 2px solid var(--amber); background: rgba(227,178,60,.06); }
+.structure span { color: var(--amber); font: 700 8px var(--font-mono); text-transform: uppercase; letter-spacing: .08em; }
+.structure strong { font-size: 11px; }.structure p { margin: 0; color: var(--muted); font-size: 9px; line-height: 1.45; }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 5px 10px; font-size: 10px; }
+.facts span { color: var(--muted); }
+.facts b { text-align: right; font: 600 10px var(--font-mono); overflow-wrap: anywhere; }
+.canvasLink { margin-top: auto; color: #8ec2ff; font-size: 11px; text-decoration: none; }
+.canvasLink:hover, .opportunityLink:hover { text-decoration: underline; }
+.opportunityLink { color: #9be5bd; font-size: 11px; text-decoration: none; }
+.captionControls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.captionControls > button, .captionControls div button { border: 1px solid #31465f; border-radius: 3px; padding: 4px 7px; background: #0c1b2c; color: #afc1d7; font: 9px var(--font-mono); cursor: pointer; }
+.captionControls div { display: flex; gap: 4px; flex-wrap: wrap; }
+.captions { display: grid; gap: 4px; max-height: 150px; overflow-y: auto; padding-right: 3px; }
+.captions > button { display: grid; grid-template-columns: 34px minmax(0,1fr); gap: 8px; width: 100%; border: 1px solid transparent; border-radius: 4px; padding: 6px; background: transparent; color: #aab9cc; text-align: left; cursor: pointer; }
+.captions > button:hover, .captionActive { border-color: #3f6590 !important; background: rgba(90,160,255,.1) !important; color: #fff !important; }
+.captions time { color: #6faeff; font: 9px var(--font-mono); }.captions span { font-size: 9px; line-height: 1.45; }
+.foot { margin: 0; color: var(--dim); font-size: 9px; line-height: 1.5; }
+.fallback { border-top: 1px solid var(--border); }
+.fallback summary { cursor: pointer; padding: 11px 18px; color: var(--muted); font-size: 11px; }
+.fallback video { display: block; width: calc(100% - 36px); max-width: 760px; margin: 0 18px 18px; border-radius: 5px; }
+.fullscreen { width: 100vw; height: 100vh; border: 0; border-radius: 0; background: #07111f; overflow: auto; }
+.fullscreen .body { grid-template-columns: minmax(0, 1fr) 410px; min-height: calc(100vh - 70px); }
+.fullscreen .stage { display: flex; flex-direction: column; }.fullscreen .chart { min-height: 620px; flex: 1; }.fullscreen .side { height: calc(100vh - 70px); }.fullscreen .liveCaption { left: 12%; right: 12%; bottom: 34px; padding: 14px 17px; }.fullscreen .liveCaption p { font-size: 15px; line-height: 1.6; }
+@media (min-width: 1051px) { .liveCaptionScenario { left: 2%; right: auto; width: min(48%, 560px); } .fullscreen .liveCaptionScenario { left: 2%; right: auto; width: min(50%, 700px); } }
+@keyframes enter { from { opacity: .25; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 1050px) { .body { grid-template-columns: 1fr; } .stage { border-right: 0; border-bottom: 1px solid var(--border); } .side { height: auto; max-height: none; overflow-y: visible; min-height: 0; } .canvasLink { margin-top: 0; } }
+@media (max-width: 620px) { .head { padding: 13px; } .mode { display: none; } .stage, .side { padding: 10px; } .chart { min-height: 390px; } .controls { grid-template-columns: auto auto 1fr; } .time { grid-column: 1 / -1; } .riskOverlay { right: 48px; } .liveCaption { left: 8px; right: 8px; bottom: 12px; }.headActions { margin-left: auto; } }
+@media (prefers-reduced-motion: reduce) { .chartBadge, .chapter { animation: none; } }

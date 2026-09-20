@@ -1,0 +1,14 @@
+.checklist { margin-top: 12px; padding: 10px 12px; border: 1px solid #374151; border-radius: 6px; background: rgba(17, 24, 39, 0.5); }
+.checklist > summary { cursor: pointer; color: #e5e7eb; font-size: 14px; font-weight: 600; }
+.lead { margin: 8px 0 0; color: #9ca3af; font-size: 12px; line-height: 1.5; }
+.steps { display: grid; gap: 14px; margin: 10px 0 0; padding-left: 20px; list-style: decimal; }
+.step { min-width: 0; color: #d1d5db; font-size: 13px; line-height: 1.55; }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; }
+.title { color: #f3f4f6; }
+.marks { display: flex; flex-wrap: wrap; gap: 6px; }
+.mark { padding: 0 7px; border: 1px solid currentColor; border-radius: 999px; font: 11px/1.7 var(--font-mono); white-space: nowrap; }
+.done { color: var(--green); }
+.todo { color: var(--amber); }
+.waiting { color: #9ca3af; }
+.unseen { color: var(--cyan); }
+.problem { color: var(--red); }

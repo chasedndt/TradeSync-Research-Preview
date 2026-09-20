@@ -1,0 +1,28 @@
+.page {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.header {
+  display: grid;
+  gap: 6px;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.lead {
+  max-width: 88ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.panel {
+  padding: 14px 16px;
+}

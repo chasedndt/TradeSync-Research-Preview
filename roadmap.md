@@ -1,0 +1,388 @@
+# TradeSync Roadmap
+
+## Active integration goal — 2026-09-19
+
+[StrikeZone research evidence in Integration Pipeline](docs/changes/2026-09-19_strikezone-research-evidence-pipeline.md)
+adds the latest bounded browser-research receipt to the optional connector read model. The host bridge selects only complete manifest/validation pairs, stores a compact advisory summary, and the Cockpit exposes freshness, chart/source coverage and exact blockers. This does not change TradeSync's Hyperliquid-only authority, paper-first mode or locked live execution.
+
+## Active integration goal — 2026-09-18
+
+[Phantom connect and wallet settings](docs/changes/2026-09-18_phantom-connect-and-wallet-settings.md)
+separates the one-action injected Phantom connection from QR/mobile pairing and
+watch-only inspection. Settings is now visible in primary navigation, delayed
+and multi-provider Brave injection is covered, and the deployed header no longer
+duplicates the WalletConnect project-ID or public-address forms. Source, test,
+build, Docker and rendered-browser acceptance pass. One real click/approval in
+the operator's Brave profile remains a physical acceptance gate, not an
+engineering claim.
+
+## Active integration goal — 2026-09-17
+
+[Editorial thesis and expanded-sidebar header acceptance](docs/changes/2026-09-17_editorial-thesis-and-expanded-header.md)
+replaces the dense scorecard revision. Mission Control now leads with a
+human-readable Bitcoin month/week/session narrative, a compact level picture
+and conditional confirmation/invalidation paragraphs. The Thesis page puts the
+interactive player directly after edition selection, follows it with an
+editorial article and real Bitcoin chart, and keeps raw measurements behind an
+optional evidence disclosure. Header acceptance now covers the actual expanded
+desktop sidebar state; the Phantom action compacts to its official icon without
+overflow. The voice/caption edition has also been regenerated from the same
+editorial sequence, and the 390 px header now keeps the Phantom control fully
+inside the viewport.
+
+[Mission Control full thesis and event scenarios](docs/changes/2026-09-17_mission-control-full-thesis.md)
+is retained as the implementation history of the superseded scorecard layout.
+Its complete-edition fetch, economic-event cases and clock removal remain; the
+primary thesis presentation was replaced by the editorial revision above.
+
+[Comprehensive market briefing and standalone-capable wallet routes](docs/changes/2026-09-17_comprehensive-thesis-and-wallet-routes.md)
+is locally deployed. The Thesis page now presents measured month-to-intraday
+BTC/ETH context, relative strength, altcoin breadth, macro/news context and
+explicit data gaps before a six-chapter synchronized chart story. Trade
+geometry is deferred to the scenario chapter and follows the chart's live time
+and price coordinates. The wallet header now separates injected Phantom,
+WalletConnect QR/mobile and watch-only routes without accepting secrets.
+Physical pairing still requires an operator-created public Reown project ID;
+Phantom embedded accounts separately require a Phantom Portal App ID.
+
+[Repository reconciliation, partitioned data plane and Rust router](docs/changes/2026-09-17_repository-reconciliation-and-rust-router.md)
+integrates the three later Claude branches that were outside the active checkout,
+adds migration 039 and deterministic data-quality gates, completes the initial
+`alert-router-rs` service, and closes the only actionable production TODO marker.
+All source/build suites pass. Docker's recurring stale runtime-socket failure is
+now safely recoverable, migrations 039 and 040 are applied, and the Rust router,
+full safe workstation profile and public-address wallet registry are locally
+deployed. The desktop shortcut now waits for this runtime and opens the Cockpit;
+the resting-liquidity surface includes 6h, 24h, 3d, 4d, 7d and 30d views with
+responsive visual acceptance. A real mobile receipt, physical wallet connection, agent-wallet
+approval and non-broadcast signing acceptance remain operator-gated.
+
+[Wallet and homepage correction](docs/changes/2026-09-17_wallet-connect-and-market-briefing.md)
+is locally deployed: the persistent header wallet chooser uses Phantom's
+documented injected EVM provider; Mission Control shows 1h through 1m context,
+market-moving events and a frozen-edition archive; and the scheduler catches up
+a missed same-day edition after restart. The official Phantom Connect SDK still
+requires an operator-created Phantom Portal App ID, and physical extension
+acceptance remains unverified.
+
+[Interactive thesis playback](docs/changes/2026-09-17_interactive-thesis-playback.md)
+replaces the passive edition video as the primary thesis media surface. Stored
+ChaseOS-compatible narration and subtitle timing now drive real Hyperliquid
+1d/8h/4h/1h chart chapters, temporary price-aligned thesis annotations and an
+exact Market Canvas handoff. The MP4 remains a fallback. This is a presentation
+surface and creates no score, drawing, opportunity, approval or order.
+
+[Thesis horizon story and evidence probabilities](docs/changes/2026-09-17_thesis-horizon-story.md)
+moves the archive to a scalable Thesis-only control, places the interactive
+chart directly beneath the selected edition, adds weekly-to-hourly chapters,
+clickable captions, explicit historical up/range/down outcome frequencies,
+systematic structure candidates and an optional price-aligned plan overlay.
+These descriptions remain non-authoritative until registered forward evidence
+and probability calibration support promotion.
+
+Engineering completion is not strategy validation. Paper economics and
+reconstruction are implemented, but no profitable scalp/swing claim exists;
+forward registered evidence remains the promotion gate.
+
+## Active integration goal — 2026-09-14
+
+[Persistent paper-entry control](docs/changes/2026-09-14_paper-control.md) is
+deployed with its migration, operator surface, reconciliation check and
+concurrency-safe control row. Entries are presently resumed for the three
+registered forward trials, while live execution remains disabled. This control
+is not itself proof of portfolio profitability.
+
+[Consolidated integration handover](docs/HANDOVER_2026-09-14_INTEGRATION_STATE.md)
+records the earlier gap state. Persistent paper risk controls, reconciliation,
+onboarding, evidence metrics, router reliability and operator surfaces were
+subsequently integrated; physical-device acceptance, forward outcomes and the
+operator-created agent wallet remain gated.
+
+[Immutable research registration foundation](docs/changes/2026-09-14_research-registration.md)
+and evaluation API are locally deployed after isolated SQL/API acceptance; migration
+025 applied. Explicit UI registration and populated forward evaluation passed
+fixture acceptance; real registered observations and elapsed outcomes remain.
+
+[Source-comparison calculation v1](docs/research/2026-09-14_source-comparison-v1.md)
+and its read-only cohort API/UI are locally deployed. Immutable trial registration
+and actual forward evidence remain; no source weight changed.
+
+[Bybit entry-context snapshots](docs/changes/2026-09-14_entry-liquidation-context.md)
+and Hyperliquid book-history snapshots now persist receipts and cutoffs without scoring influence. Other source joins and
+registered source-contribution evaluation remain incomplete.
+
+[First-received liquidation provenance](docs/changes/2026-09-14_first-received-liquidations.md)
+is deployed and Redis-tested. Durable entry snapshots and source evaluation remain.
+
+[Mobile lifecycle preferences/producer](docs/changes/2026-09-14_mobile-lifecycle-policy.md)
+are locally deployed with migration 024, isolated SQL acceptance and desktop/mobile
+UI QA. Private setup, real phone receipts and sustained delivery remain open.
+
+[Live-market paper API integration passed in rolled-back QA tables](docs/changes/2026-09-14_paper-api-live-market-acceptance.md).
+The [trading-day checklist](docs/runbooks/TRADING_DAY_READINESS.md) distinguishes
+supervised paper testing from incomplete mobile, strategy and live-execution gates.
+
+[Managed-paper backend and frozen research protocol](docs/changes/2026-09-14_managed-paper-backend.md)
+are implemented/tested. [Dashboard controls and desktop/mobile QA](docs/changes/2026-09-14_managed-paper-dashboard.md)
+are now locally deployed. Live-data forward acceptance, direct external entry joins
+and settled-funding evidence remain open; no strategy promotion.
+
+[Mobile notification foundation](docs/changes/2026-09-14_mobile-alert-outbox.md)
+is implemented; real control setup, device receipt, event producers and preferences
+remain open. Native ntfy compatibility does not claim a completed TradeSync PWA.
+
+[Watch-only wallet activity is implemented and locally deployed](docs/changes/2026-09-14_watch-only-activity.md);
+operator-account/device acceptance and signing/execution gates remain separate.
+
+[Current change record and next-action register](docs/changes/2026-09-14_liquidity-intraday-and-integration-goal.md):
+observed Hyperliquid book history, separate Bybit liquidation context and 1h/4h/8h/1d
+analysis implemented. Durable entry evidence, managed paper trading, Android **and**
+iPhone alerts, expanded watch-only wallets and evaluated strategy improvements
+remain open. No automated weight promotion or live-execution readiness claimed.
+
+## Current status — 2026-09-13
+
+The [reconciled roadmap and handover register](docs/ROADMAP_RECONCILIATION_2026-09-13.md)
+is the current status index, including implemented Fleet/research work, measured
+trading losses, scheduled-job acceptance and every remaining programme area.
+Earlier dated status paragraphs below are historical; capability tiers and
+execution gates still apply. Next: immutable entry evidence and managed paper
+positions; wallet visibility may proceed separately from live-trading authority.
+
+## Operator usability follow-up — 2026-09-09
+
+WalletConnect address-only QR pairing is implemented in source, pending the operator's public project ID, dependency-security triage and live acceptance. See [scope and gates](docs/changes/2026-09-09_walletconnect-address-only.md). This is not a signing or execution connector.
+
+Watch-only account onboarding is implemented as a session-only public-address lookup; see [verification and scope](docs/changes/2026-09-09_watch-only-wallet.md). It does not enable signing or replace the pending paper-rehearsal and unified-connector work.
+
+Canvas modes, labelled hypothetical outcomes and separate adapter readbacks are implemented in source; see [the change record](docs/changes/2026-09-09_canvas-and-adapter-readbacks.md) for verification limits. Next: rendered chart/drawing acceptance; unified integration freshness/receipt status; Pine source inventory; signal-lifecycle and cost-aware replay; watch-only public-address onboarding and paper rehearsal. These do not enable execution, jobs or external publishing. Earlier completion dates/statuses below remain historical until reconciled.
+
+Last updated: 2026-09-02
+
+Planning horizon: three-week foundation sprint plus gated continuation
+
+Operating rule: standalone-first, Hyperliquid-only, paper-first, fail-closed
+
+## Expected outcome
+
+At the end of the foundation programme, TradeSync is one coherent operator workstation that can:
+
+1. consume and retain authoritative Hyperliquid market data in real time;
+2. calculate explainable regimes and liquidation evidence without presenting proxies as facts;
+3. surface ranked paper opportunities and complete decision evidence;
+4. provide an internal Market Canvas with chart-native alerts;
+5. continue all core functions while ChaseOS, Strike Zone, local models, notification adapters, or wallets are unavailable;
+6. synchronize approved ChaseOS graph snapshots and Strike Zone paper candidates when those connectors are available;
+7. deliver governed alerts to desktop and mobile without an Xcode/native-iOS build;
+8. support later wallet preview and execution only through an isolated signer, single-use approval consumption, risk policy, and reconciliation;
+9. feed outcomes and lessons back as proposals for ChaseOS review, never as autonomous canonical truth.
+
+## Architecture invariants
+
+- **Standalone is a product, not a degraded mode.** Market data, regimes, alerts, charting, paper opportunities, and journaling belong to Tier A.
+- **Connectors enrich; they do not own core availability.** Optional connector outages are visible and recoverable.
+- **Knowledge and authority are separate.** A graph fact, model explanation, or Strike Zone candidate can inform a decision but cannot approve or execute it.
+- **Execution fails closed.** Missing Gate, signer, wallet state, account state, nonce state, risk state, or reconciliation blocks order submission.
+- **Artifacts are truth; indexes are rebuildable.** ChaseOS `GraphSnapshot` JSON and TradeSync Postgres rows are durable. Redis and Qdrant are derived/transport layers.
+- **Hyperliquid is the only venue.** Solana ecosystem research stays in a separate namespace and does not silently become an execution venue.
+- **Paper/live labels are explicit on every record and surface.**
+
+## Three-week foundation sprint
+
+### Week 1 — Market truth, contracts, and Rust foothold
+
+Status: source implementation and local runtime acceptance complete. Migration
+039 is applied; the Hyperliquid stream is connected with REST fallback and
+freshness evidence; the Rust contract/router tests and authenticated live router
+acceptance pass. Longer-duration restart/replay observation remains ongoing.
+
+- Replace polling-only critical paths with a reconnecting Hyperliquid WebSocket design for `activeAssetCtx`, candles, `l2Book`, trades, and later user-scoped fills/events.
+- Correct 24-hour change, market freshness, and service-probe semantics.
+- Define `market_event_v1`, `alert_event_v1`, `knowledge_sync_v1`, and `trade_candidate_v1` boundaries.
+- Add the Rust shared-contract crate and make it the compatibility seam for the future real-time edge and notification router.
+- Audit existing liquidation proxies; label proxy fields unmistakably and prevent 50/50 long/short estimates from appearing authoritative.
+- Design PostgreSQL partitions/indexes for candles, market events, alerts, and graph projections.
+- Add deterministic data-quality tests for duplicate IDs, timestamp order, source authority, stale events, and missing lineage.
+
+Exit gate:
+
+- Rust contract tests pass.
+- Hyperliquid samples map to versioned fixtures.
+- Liquidation and regime fields declare `observed`, `derived`, `proxy`, or `unavailable` provenance.
+- Restart/replay tests prove no duplicate durable events.
+
+### Week 2 — Regimes, opportunities, knowledge connector, and alert router
+
+Current override (17 September): the initial Rust router, graph projection,
+knowledge intake, opportunity pipeline and Activity & Evidence source work are
+implemented. Optional connector, real-device and forward-strategy evidence are
+acceptance gates, not missing source modules. The dated paragraph below records
+the earlier implementation path and is retained as history.
+
+Status: in progress. Quant Foundations Book 1, the draft paper rulebook, 17-feature catalog, cadence-governed feature extraction, ordinary/robust normalization, deterministic block aggregation, State API comparison, persistence migrations/runner, the private Regime Lab, and the read-only Integration Pipeline inspector are implemented locally. Docker-backed Redis history accumulation, migration application, PostgreSQL draft persistence, Cockpit proxy recovery, live integration probes, expand/focus inspection, and responsive pipeline layouts were verified locally on 2026-09-02. Fixed-window replay remains unverified/planned. On 2026-09-07 the regime-backed paper signal path was implemented and unit-tested: `hl_return_1h_pct` was derived and promoted in feature catalog `1.1.0`, `paper_signal.py` added deterministic admission with recorded refusal reasons, `core-scorer` was rewired to read regime evidence instead of the legacy events table, and `fusion-engine` gained a `paper_signal_v1` pass-through that preserves regime evidence rather than re-scoring it. Those two services are still not admitted to the bounded runtime, and no end-to-end paper opportunity has been observed live yet. Note that `positioning` and `macro_flows` declare no generically admitted feature. `spot_premium` gained one on 2026-09-08 when `coinbase_premium_bps` was promoted to scoring, and the 0.55 ceiling that limitation implied no longer binds: over the hour after promotion, live `data_coverage` ranged 0.2528 to 0.6375, mean 0.5621.
+
+- Rebuild regime classification from measured trend, volatility, funding, OI, volume, liquidity, and market-structure inputs.
+- Run the versioned rulebook beside the legacy classifier before replacement; retain configuration digest, source lineage, per-block quality, contribution trace, and paper-risk caps for every score.
+- Extract and persist only catalog-admitted `market_feature_v1` observations; block proxy/context/unavailable inputs from generic scoring and reject future timestamps to prevent look-ahead.
+- Add a Regime Lab where the operator can inspect notation, edit a draft challenger, validate weights, compare versions, replay a fixed paper window, and request paper activation without exposing live execution controls.
+- Restore scorer/fusion health probes and the paper opportunity pipeline.
+- Use the Integration Pipeline inspector to expose Tier A readiness, optional connector state, workflow edges, missing capabilities, impact, and bounded restart/development targets without adding mutating restart controls.
+- Implement a read-only ChaseOS graph-snapshot adapter and a local PostgreSQL graph projection.
+- Implement Strike Zone receipt validation into `trade_candidate_v1`; candidates remain paper research.
+- Begin the Rust `alert-router-rs` service with PostgreSQL outbox, Redis consumer groups, deduplication, priority, expiry, quiet hours, and delivery receipts.
+- Replace Sources with Knowledge Graph intake: drag/drop enters quarantine, extraction produces a proposed graph delta, and only approved promotion changes canonical knowledge.
+- Replace Decisions/Orders shells with Activity & Evidence tabs: Decisions, Approvals, Orders, Alerts, Outcomes.
+
+Exit gate:
+
+- TradeSync remains fully usable with every optional connector disabled.
+- Disconnect/reconnect tests replay graph deltas and alerts without duplication.
+- No model or connector can write canonical ChaseOS knowledge or consume approval authority.
+
+### Week 3 — Mobile alerts, Market Canvas foundation, and reliability
+
+Status: source implemented and deployed on 16 September; physical Android/iPhone receipt acceptance remains.
+
+- Add a PWA manifest, service worker, notification permission flow, and Web Push subscription management.
+- Add an ntfy adapter as a free fast-path while keeping the Rust router vendor-neutral.
+- Add notification preferences by project, symbol, severity, category, quiet hours, and device.
+- Add acknowledgement, retry/backoff, dead-letter, dedupe, rate-limit, and delivery-ledger views.
+- Add the first Market Canvas route with a Hyperliquid chart, timeframe selection, evidence markers, and alert-rule creation.
+- Run desktop/tablet/mobile responsive QA, browser-console checks, restart recovery, and an alert-latency soak.
+
+Exit gate:
+
+- A paper opportunity or critical system-health event reaches an enrolled Android or iOS Home Screen PWA/ntfy client with a durable delivery receipt.
+- iOS setup documents the Home Screen requirement; no Apple Developer membership or Xcode project is required for standards-based Web Push.
+- No alert action can place an order.
+- The service can be reused by another ChaseOS project by changing `project`, routing policy, and producer credentials—not by forking the router.
+
+## Phase 4 — Market Canvas and journal maturity
+
+Status: implemented and locally deployed, including the latest paper
+MFE/MAE/economics, activity exports, style-aware candidate admission and the
+wallet manager. Forward evidence remains.
+
+- TradingView Lightweight Charts or KLineChart-based per-market workspace.
+- Candles, funding, OI, volume, order-book depth, liquidity, regimes, alerts, drawings, and evidence timeline.
+- Versioned user drawings and alert rules stored server-side.
+- Deterministic outcome metrics: expectancy, drawdown, adverse/favourable excursion, slippage, thesis adherence, and regime fit.
+- Reconciliation views for orphaned events, duplicate candidates, stale approvals, partial orders, and missing outcomes.
+
+Exit gate: a paper trade can be reconstructed from source observation through outcome without screenshots or memory.
+
+## Phase 5 — Wallet and approval foundation
+
+Status (17 September): watch-only Hyperliquid account activity, direct
+Phantom/EIP-1193 public-address connection, an audited wallet registry,
+address-only WalletConnect pairing, signing-contract tests, an opt-in isolated signer,
+caller-token/network isolation, deterministic Hyperliquid signing and durable
+single-use signer approvals are implemented. No private key is configured and
+the signer/executor remain disabled. The current ChaseOS control envelope is
+explicitly paper-evaluation-only; inventing live approval authority is not a
+remaining local TODO and requires an approved authority contract plus a passing
+strategy gate.
+
+Recovery phrases and private keys are imported only inside the trusted wallet,
+never TradeSync. This phase moves earlier than Solana expansion, but remains approval-gated.
+
+- Create a separate Hyperliquid agent/API wallet only after explicit operator action.
+- Keep private keys out of browser storage, logs, prompts, model contexts, PostgreSQL, Redis, Qdrant, and general service environments.
+- Run the signer in an isolated service with the smallest possible API and network scope.
+- Implement preview → approval request → approval decision → single-use consumption → final risk check → order intent → venue receipt → reconciliation.
+- Support modes: `locked`, `observe`, `paper`, `approval_required`, and later `bounded_autonomous`.
+- A ChaseOS Gate outage blocks modes that require approval; it does not stop standalone observation, paper alerts, or journal review.
+
+Exit gate: testnet or non-broadcast signed-intent verification, replay protection, expiration, changed-payload invalidation, kill-switch test, and security review.
+
+## Phase 6 — Bounded Hyperliquid canary
+
+- Separate canary wallet and explicit capital ceiling.
+- One market, one strategy version, low leverage, small notional, and a bounded time window.
+- Pre-trade and post-trade account reconciliation.
+- Automatic block on stale market/account state, policy mismatch, approval mismatch, nonce uncertainty, delivery uncertainty, or daily-loss ceiling.
+- Human-readable incident and rollback runbooks.
+
+No-go: no production-sized deployment, self-increasing limits, self-promotion of a strategy, or model access to signing material.
+
+## Phase 7 — Solana ecosystem research
+
+- Add Solana token discovery and Phantom/Solana wallet visibility in a separate `solana_research` authority namespace.
+- Use Rust where it improves Solana RPC ingestion, transaction decoding, and deterministic validation.
+- Add liquidity, contract/program risk, holder concentration, mint/freeze authority, route quality, and manipulation gates.
+- Reuse Market Canvas and alerting; do not route Solana assets through Hyperliquid execution semantics.
+- Any Solana signing capability gets its own signer, approvals, limits, and threat model.
+
+## Product-surface backlog
+
+### Regime Lab
+
+Show the active paper champion and draft challenger, all block weights, running total, normalization curve, data-quality coverage, contribution trace, risk caps, rulebook digest, experiment hypothesis, evaluation window, outcome KPI, drivers, guardrails, and rollback. The panel must call the shared calculation library through the API rather than reproduce mathematical logic in TypeScript.
+
+### Regime summary
+
+Show current regime, confidence, evidence components, conflicting factors, source freshness, transition history, and “why not higher confidence.” Never show `UNKNOWN` without the missing inputs.
+
+### Liquidations
+
+Separate observed user-fill liquidation events, venue-level liquidation mechanics, inferred pressure, and legacy proxy estimates. Show direction only when the source supports it.
+
+### Opportunities
+
+Show symbol/timeframe, side, regime fit, entry conditions, invalidation, stop, targets, estimated risk/reward, evidence, provenance, age, and paper/live state.
+
+### Activity & Evidence
+
+Status (17 September): the five tabs are implemented and locally deployed at
+`/logs` on the audit export and market alerts, showing the statuses the stored
+rows carry. The stored rows do not yet carry every state listed below: see the
+[change record](docs/changes/2026-09-16_activity-and-evidence.md), section 5.
+
+- Decisions: proposed/allowed/blocked/expired plus policy reasons.
+- Approvals: pending/approved/denied/expired/consumed with immutable payload digest.
+- Orders: preview/submitted/placed/partial/filled/cancelled/failed/reconciled.
+- Alerts: triggered/routed/delivered/acknowledged/expired/dead-lettered.
+- Outcomes: P&L, MFE/MAE, fees, funding, slippage, thesis adherence, and lessons.
+
+### Settings
+
+Status (16 September): implemented and locally deployed.
+
+Replace generic browser-local API fields with operator settings: data connections, connector health, notification devices and quiet hours, display/timezone, risk-policy summaries, execution mode, wallet connection status, retention, exports, and diagnostics. Secrets are configured through governed server-side mechanisms, never pasted into ordinary UI fields.
+
+### Operator profile
+
+Status (16 September): implemented and locally deployed without implying real authentication.
+
+Make the profile menu identify the current operator/runtime, trust tier, active mode, approval inbox, device sessions, audit exports, and lock/sign-out actions. It must not imply authentication until real identity/session support exists.
+
+## Free provider plan
+
+| Need | Initial free path | Authority |
+|---|---|---|
+| Perpetual market truth | Hyperliquid public API/WebSocket | Authoritative |
+| Spot cross-check | CoinGecko Demo | Context only |
+| Protocol TVL | DefiLlama | Context only |
+| Macro | FRED free key | Context only |
+| Mobile delivery | Standards-based Web Push plus optional ntfy | Notification transport only |
+| Local explanations | Hermes/Ollama | Advisory only |
+
+Paid data is considered only after a measured gap cannot be closed with venue data, local calculation, or a free source.
+
+## Programme definition of done
+
+TradeSync is not “done” because containers start or panels render. A capability is complete only when its contract, source authority, persistence, restart behavior, failure behavior, tests, operator surface, evidence, security boundary, and documentation agree.
+
+## Quant learning lane
+
+Every mathematical feature follows an education gate alongside its engineering gate:
+
+1. define notation, units, comparator, and formula in plain English;
+2. calculate a small example by hand;
+3. implement the deterministic function and tests;
+4. map the topic to the operator's Year 2 syllabus;
+5. complete the associated practice task;
+6. run paper-shadow evidence before changing the champion;
+7. retain a public-safe development record without publishing secrets, trade calls, or unverified performance claims.
+
+Book 1 covers notation, z-scores, `tanh`, weighted averages, data quality, basis points, paper-risk multipliers, and champion/challenger versioning. Later books will cover covariance, regression, inference, optimization, time series, and Markov models only when the required data and implementation stage exist.

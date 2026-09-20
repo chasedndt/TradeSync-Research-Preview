@@ -1,0 +1,35 @@
+{
+  "name": "TradeSync Cockpit",
+  "short_name": "TradeSync",
+  "description": "Hyperliquid-only paper workstation: Mission Control, market data, paper positions and notifications.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#07111f",
+  "background_color": "#07111f",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    {
+      "src": "/brand/tradesync-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/tradesync-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/tradesync-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

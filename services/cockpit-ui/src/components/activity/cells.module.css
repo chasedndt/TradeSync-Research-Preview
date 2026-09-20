@@ -1,0 +1,41 @@
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.code {
+  color: #bcc7d8;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+a.code {
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+a.code:hover {
+  text-decoration: underline;
+}
+
+.carried {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 0;
+  font-size: 12px;
+}
+
+.carried div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.carried dt {
+  color: var(--muted);
+}
+
+.carried dd {
+  margin: 0;
+}

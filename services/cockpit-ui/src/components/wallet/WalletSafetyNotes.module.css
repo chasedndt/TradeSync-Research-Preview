@@ -1,0 +1,5 @@
+.notes { margin: 0 0 16px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--panel-muted); }
+.notes > summary { cursor: pointer; color: #e8edf5; font-size: 13px; font-weight: 600; }
+.list { display: grid; gap: 8px; margin: 8px 0 0; padding-left: 18px; color: #cbd5e1; font-size: 12px; line-height: 1.6; list-style: disc; }
+.list strong { color: #f5f7fb; }
+.gate { display: block; margin-top: 2px; font-family: var(--font-mono); font-size: 11px; }

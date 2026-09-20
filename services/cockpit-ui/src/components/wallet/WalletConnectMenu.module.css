@@ -1,0 +1,47 @@
+.root { position: relative; }
+.trigger { min-width: 150px; min-height: 48px; display: inline-flex; align-items: center; gap: 10px; padding: 3px 13px 3px 4px; border: 1px solid rgba(171,159,242,.68); border-radius: 12px; background: linear-gradient(135deg, rgba(103,85,204,.3), #101e30 68%); color: #f7f5ff; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 5px 18px rgba(40,31,91,.18); }
+.trigger:hover { border-color: #a99ff2; background: linear-gradient(135deg, rgba(171,159,242,.23), #15273c 66%); transform: translateY(-1px); }
+.trigger img { width: 40px; height: 40px; border-radius: 11px; box-shadow: 0 4px 16px rgba(105,89,211,.38); }
+.triggerCopy { display: grid; gap: 1px; text-align: left; line-height: 1.1; }
+.triggerCopy small { color: #aaa4cf; font-size: 8px; letter-spacing: .07em; text-transform: uppercase; }
+.triggerCopy strong { font: 750 12px var(--font-sans); white-space: nowrap; }
+
+.backdrop { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 18px; background: rgba(2, 8, 17, .72); backdrop-filter: blur(5px); }
+.modal { width: min(460px, 100%); max-height: min(760px, calc(100vh - 36px)); overflow: auto; border: 1px solid #40536c; border-radius: 18px; background: #0c1726; box-shadow: 0 28px 90px rgba(0,0,0,.58); }
+.head { display: flex; justify-content: space-between; gap: 18px; padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
+.head h2 { margin: 0; font-size: 19px; }
+.head p { margin: 5px 0 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+.close { width: 32px; height: 32px; flex: 0 0 auto; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 50%; background: #132136; cursor: pointer; }
+.body { display: grid; gap: 14px; padding: 18px 20px 22px; }
+.walletOption { width: 100%; display: grid; grid-template-columns: 44px minmax(0,1fr) auto; gap: 12px; align-items: center; padding: 12px; border: 1px solid #33465f; border-radius: 12px; background: #111f31; color: inherit; text-align: left; cursor: pointer; }
+.walletOption:hover { border-color: #776dc5; background: #17263a; }
+.walletOption:disabled { opacity: .62; cursor: wait; }
+.walletOption img { width: 44px; height: 44px; border-radius: 11px; }
+.walletOption strong { display: block; font-size: 14px; }
+.walletOption span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.35; }
+.arrow { color: #c4bdf6 !important; font-size: 18px !important; }
+.connected { display: grid; gap: 8px; }
+.connected h3, .sectionTitle { margin: 0; color: #c7d2e2; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+.account { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 12px; align-items: center; padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px; background: #0a1522; }
+.account strong { display: block; font-size: 12px; }
+.account span { display: block; margin-top: 3px; color: var(--muted); font: 10px var(--font-mono); }
+.accountActions { display: flex; gap: 6px; }
+.smallButton { border: 1px solid #40536c; border-radius: 6px; padding: 6px 8px; background: transparent; color: #cdd9e7; cursor: pointer; font-size: 10px; }
+.smallButton:hover { background: #17263a; }
+.notice { margin: 0; padding: 11px 12px; border-radius: 9px; background: rgba(171,159,242,.08); color: #c9c3ec; font-size: 11px; line-height: 1.5; }
+.notice strong { color: #f5f3ff; }
+.error { margin: 0; padding: 9px 11px; border: 1px solid rgba(255,65,77,.35); border-radius: 8px; color: #ff8c93; font-size: 11px; line-height: 1.45; }
+.missingWallet { display: grid; grid-template-columns: 58px minmax(0,1fr); gap: 13px; align-items: start; padding: 15px; border: 1px solid rgba(171,159,242,.35); border-radius: 12px; background: linear-gradient(135deg, rgba(171,159,242,.12), rgba(17,31,49,.65)); }
+.missingWallet > img { width: 58px; height: 58px; border-radius: 14px; }.missingWallet strong { display: block; color: #f5f3ff; font-size: 14px; }.missingWallet span { display: block; margin-top: 5px; color: #b8b3d5; font-size: 11px; line-height: 1.5; }
+.missingActions { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.primaryButton { border: 1px solid #9589e4; border-radius: 7px; padding: 7px 11px; background: #776dc5; color: #fff; cursor: pointer; font-size: 11px; font-weight: 750; }
+.detecting { min-height: 72px; display: flex; align-items: center; justify-content: center; gap: 12px; color: #c9c3ec; font-size: 12px; }.detecting img { width: 42px; height: 42px; border-radius: 11px; }
+.settingsLink { border: 0; padding: 2px 0; background: transparent; color: #a99ff2; text-align: left; cursor: pointer; font-size: 11px; }
+.divider { height: 1px; background: var(--border); }
+@media (max-width: 920px) { .triggerCopy { display: none; } .trigger { min-width: 48px; padding-right: 5px; } }
+@media (min-width: 701px) {
+  :global(html.sidebar-expanded) .triggerCopy { display: none; }
+  :global(html.sidebar-expanded) .trigger { min-width: 48px; width: 48px; padding: 3px; justify-content: center; }
+  :global(html.sidebar-expanded) .trigger img { width: 40px; height: 40px; }
+}
+@media (max-width: 640px) { .backdrop { padding: 0; align-items: end; } .modal { width: 100%; max-height: 88vh; border-radius: 18px 18px 0 0; } }
